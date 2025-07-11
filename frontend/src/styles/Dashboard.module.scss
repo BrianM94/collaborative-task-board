@@ -1,0 +1,21 @@
+.dashboard {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background: linear-gradient(120deg, #f5f7fa 0%, #c3cfe2 100%);
+    padding: 2rem;
+}
+
+.columns {
+    display: flex;
+    gap: 2rem;
+    overflow-x: auto;
+    flex: 1;
+}
+
+.header {
+    margin-bottom: 1rem; 
+    display: flex; 
+    gap: 1rem; 
+    align-items: center
+}

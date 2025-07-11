@@ -1,0 +1,41 @@
+.task {
+    background: #f7fafc;
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+    padding: 0.75rem 1rem;
+    cursor: grab;
+    transition:
+        box-shadow 0.2s,
+        opacity 0.2s;
+    border-left: 4px solid #a0aec0;
+}
+
+.task:active {
+    cursor: grabbing;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.title {
+    font-weight: 500;
+    color: #2d3748;
+}
+
+.priority {
+    font-size: 0.85rem;
+    padding: 0.2em 0.6em;
+    border-radius: 6px;
+    background: #e2e8f0;
+    color: #4a5568;
+    text-transform: capitalize;
+}
+
+.status {
+    font-size: 0.85rem;
+    color: #718096;
+}
