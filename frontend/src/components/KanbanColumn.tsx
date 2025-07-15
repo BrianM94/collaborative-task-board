@@ -25,11 +25,12 @@ const KanbanColumn = ({ column, tasks, onEdit, onDelete, onEditTask, onDeleteTas
     transition,
     isDragging,
   } = useSortable({
-    id: column.id,
+    id: `column-${column.id}`,
     data: {
       type: 'Column',
       column,
     },
+    disabled: false,
   });
 
   const style = {
@@ -39,18 +40,46 @@ const KanbanColumn = ({ column, tasks, onEdit, onDelete, onEditTask, onDeleteTas
   };
 
   return (
-    <div ref={setNodeRef} style={style} className={styles.column}>
-      <div {...attributes} {...listeners} className={styles.header}>
+    <div 
+      ref={setNodeRef} 
+      style={style} 
+      {...attributes} 
+      className={styles.column}
+      data-column-id={column.id}
+    >
+      <div {...listeners} className={styles.header}>
         <h2 className={styles.title}>{column.name}</h2>
         <div className={styles.actions}>
-            <button onClick={() => onEdit?.(column)} disabled={!onEdit}>Editar</button>
-            <button onClick={() => onDelete?.(column)} disabled={!onDelete} className={styles.delete}>Eliminar</button>
+          <button 
+            onClick={() => onEdit?.(column)} 
+            disabled={!onEdit}
+            onMouseDown={(e) => e.stopPropagation()}
+          >
+            Editar
+          </button>
+          <button 
+            onClick={() => onDelete?.(column)} 
+            disabled={!onDelete} 
+            className={styles.delete}
+            onMouseDown={(e) => e.stopPropagation()}
+          >
+            Eliminar
+          </button>
         </div>
       </div>
-      <div className={styles.tasks}>
+
+      <div 
+        className={styles.tasks}
+        data-column-drop-zone={column.id}
+      >
         <SortableContext items={tasksIds}>
           {tasks.map((task) => (
-            <KanbanTask key={task.id} task={task} onEdit={onEditTask} onDelete={onDeleteTask} />
+            <KanbanTask 
+              key={task.id} 
+              task={task} 
+              onEdit={onEditTask} 
+              onDelete={onDeleteTask} 
+            />
           ))}
         </SortableContext>
       </div>
