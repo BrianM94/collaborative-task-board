@@ -38,11 +38,14 @@ const KanbanTask = ({ task, onEdit, onDelete }: Props) => {
     <div ref={setNodeRef} style={{...style, ...containerStyle}} {...attributes} {...listeners} className={styles.task}>
         <div className={styles.header}>
             <h4 className={styles.title}>{task.title}</h4>
-            <p>{task.description}</p>
-            <div className={styles.footer}>
+
+            <div className={styles.cardInformation}>
                 <span className={styles.priority}>{task.priority}</span>
                 <span className={styles.status}>{task.status}</span>
             </div>
+        </div>
+        <div>
+            <p className={styles.description}>{task.description}</p>
         </div>
         <div className={styles.actions}>
             <button onClick={() => onEdit?.(task)} disabled={!onEdit}>Editar</button>

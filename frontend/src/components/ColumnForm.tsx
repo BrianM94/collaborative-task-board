@@ -5,9 +5,10 @@ interface Props {
     onSubmit: (data: CreateColumnRequest | UpdateColumnRequest) => Promise<void>;
     initialData?: BoardColumn;
     loading?: boolean;
+    onCancel?: () => void;
 }
 
-const ColumnForm: React.FC<Props> = ({ onSubmit, initialData, loading }) => {
+const ColumnForm: React.FC<Props> = ({ onSubmit, initialData, loading, onCancel }) => {
     const [name, setName] = useState(initialData?.name || '');
     const [order, setOrder] = useState(initialData?.order || 0);
 
@@ -18,24 +19,29 @@ const ColumnForm: React.FC<Props> = ({ onSubmit, initialData, loading }) => {
 
     return (
         <form onSubmit={handleSubmit}>
-            <input
-                type="text"
-                placeholder="Nombre de columna"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-            />
-            <input
-                type="number"
-                placeholder="Orden"
-                value={order}
-                onChange={(e) => setOrder(Number(e.target.value))}
-                required
-                min={0}
-            />
-            <button type="submit" disabled={loading}>
-                {initialData ? 'Actualizar' : 'Crear columna'}
-            </button>
+            <div className="formGroup">
+                <input
+                    type="text"
+                    placeholder="Nombre de columna"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                />
+                <input
+                    type="number"
+                    placeholder="Orden"
+                    value={order}
+                    onChange={(e) => setOrder(Number(e.target.value))}
+                    required
+                    min={0}
+                />
+            </div>
+            <div>
+                <button type="submit" disabled={loading}>
+                    {initialData ? 'Actualizar' : 'Crear columna'}
+                </button>
+                <button type="button" onClick={onCancel}>Cerrar</button>
+            </div>
         </form>
     );
 };
