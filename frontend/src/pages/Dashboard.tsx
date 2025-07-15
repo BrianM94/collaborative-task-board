@@ -5,10 +5,11 @@ import {
   PointerSensor, 
   useSensor, 
   useSensors, 
-  closestCorners,
+  closestCenter,
+  rectIntersection,
 } from '@dnd-kit/core';
-import type { DragEndEvent, DragStartEvent, DragOverEvent } from '@dnd-kit/core';
-import { SortableContext } from '@dnd-kit/sortable';
+import type { DragEndEvent, DragStartEvent, DragOverEvent, CollisionDetection } from '@dnd-kit/core';
+import { SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortable';
 import { createPortal } from 'react-dom';
 
 import { useAuth } from '../hooks/useAuth';
@@ -56,6 +57,16 @@ const Dashboard = () => {
       activationConstraint: { distance: 10 },
     })
   );
+
+  const customCollisionDetection: CollisionDetection = (args) => {
+    const { active } = args;
+    
+    if (active.data.current?.type === 'Column') {
+      return closestCenter(args);
+    }
+    
+    return rectIntersection(args);
+  };
 
   const onDragStart = (event: DragStartEvent) => {
     const { active } = event;
@@ -213,10 +224,10 @@ const Dashboard = () => {
         onDragStart={onDragStart} 
         onDragEnd={onDragEnd} 
         onDragOver={onDragOver} 
-        collisionDetection={closestCorners}
+        collisionDetection={customCollisionDetection}
       >
         <div className={styles.columns}>
-          <SortableContext items={columnsId}>
+          <SortableContext items={columnsId} strategy={horizontalListSortingStrategy}>
             {columns.map((col) => (
               <KanbanColumn
                 key={col.id}
