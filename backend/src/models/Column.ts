@@ -1,4 +1,5 @@
-import { Table, Column, Model, DataType, CreatedAt, UpdatedAt, PrimaryKey, AutoIncrement } from "sequelize-typescript";
+import { Table, Column, Model, DataType, CreatedAt, UpdatedAt, PrimaryKey, AutoIncrement, ForeignKey, BelongsTo } from "sequelize-typescript";
+import { User } from "./User";
 
 @Table({ 
   tableName: "Columns",
@@ -15,6 +16,16 @@ export class BoardColumn extends Model<BoardColumn> {
 
   @Column(DataType.INTEGER)
   declare order: number;
+
+  @ForeignKey(() => User)
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: false,
+  })
+  declare userId: number;
+
+  @BelongsTo(() => User)
+  declare user: User;
 
   @CreatedAt
   @Column(DataType.DATE)

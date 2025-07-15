@@ -1,32 +1,28 @@
 import { Request, Response, NextFunction } from "express";
 import { TaskService } from "../services/taskService";
-import { Task } from "../models/Task";
+interface AuthRequest extends Request {
+  user?: { id: number; username: string };
+}
 
 export const createTask = async (
-  req: Request,
+  req: AuthRequest,
   res: Response,
   next: NextFunction
 ) => {
   try {
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(401).json({ message: "No autorizado" });
+      return;
+    }
+
     const { title, description, priority, status, order, columnId } = req.body;
-    if (
-      !title ||
-      !priority ||
-      !status ||
-      typeof order !== "number" ||
-      !columnId
-    ) {
+    if (!title || !priority || !status || typeof order !== "number" || !columnId) {
       res.status(400).json({ message: "Campos requeridos faltantes" });
       return;
     }
-    const task = await TaskService.createTask({
-      title,
-      description,
-      priority,
-      status,
-      order,
-      columnId,
-    });
+
+    const task = await TaskService.createTask(req.body, userId);
     res.status(201).json(task);
   } catch (err) {
     next(err);
@@ -34,13 +30,19 @@ export const createTask = async (
 };
 
 export const getAllTasks = async (
-  req: Request,
+  req: AuthRequest,
   res: Response,
   next: NextFunction
 ) => {
   try {
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(401).json({ message: "No autorizado" });
+      return;
+    }
+
     const { status, priority } = req.query;
-    const tasks = await TaskService.getAllTasks({
+    const tasks = await TaskService.getAllTasks(userId, {
       status: status as string | undefined,
       priority: priority as string | undefined,
     });
@@ -51,13 +53,20 @@ export const getAllTasks = async (
 };
 
 export const getTaskById = async (
-  req: Request,
+  req: AuthRequest,
   res: Response,
   next: NextFunction
 ) => {
   try {
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(401).json({ message: "No autorizado" });
+      return;
+    }
+
     const id = Number(req.params.id);
-    const task = await TaskService.getTaskById(id);
+    const task = await TaskService.getTaskById(id, userId);
+
     if (!task) {
       res.status(404).json({ message: "Tarea no encontrada" });
       return;
@@ -69,20 +78,24 @@ export const getTaskById = async (
 };
 
 export const updateTask = async (
-  req: Request,
+  req: AuthRequest,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const id: number = Number(req.params.id);
-    const data: Partial<Omit<Task, "id">> = req.body;
-    const task: Task | null = await TaskService.updateTask(id, data);
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(401).json({ message: "No autorizado" });
+      return;
+    }
+
+    const id = Number(req.params.id);
+    const task = await TaskService.updateTask(id, userId, req.body);
 
     if (!task) {
       res.status(404).json({ message: "Tarea no encontrada" });
       return;
     }
-
     res.json(task);
   } catch (err) {
     next(err);
@@ -90,13 +103,20 @@ export const updateTask = async (
 };
 
 export const deleteTask = async (
-  req: Request,
+  req: AuthRequest,
   res: Response,
   next: NextFunction
 ) => {
   try {
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(401).json({ message: "No autorizado" });
+      return;
+    }
+
     const id = Number(req.params.id);
-    const deleted = await TaskService.deleteTask(id);
+    const deleted = await TaskService.deleteTask(id, userId);
+
     if (!deleted) {
       res.status(404).json({ message: "Tarea no encontrada" });
       return;
@@ -108,20 +128,24 @@ export const deleteTask = async (
 };
 
 export const reorderTasks = async (
-  req: Request,
+  req: AuthRequest,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const { tasks }: { tasks: { id: number; order: number; columnId: number }[] } = req.body;
-
-    if (!tasks || !Array.isArray(tasks)) {
-      res.status(400).json({ message: "Se requiere un array de tareas." });
-      return; 
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(401).json({ message: "No autorizado" });
+      return;
     }
 
-    await TaskService.updateTaskOrder(tasks);
+    const { tasks } = req.body;
+    if (!tasks || !Array.isArray(tasks)) {
+      res.status(400).json({ message: "Se requiere un array de tareas." });
+      return;
+    }
 
+    await TaskService.updateTaskOrder(userId, tasks);
     res.status(200).json({ message: "Tareas reordenadas correctamente." });
   } catch (err) {
     next(err);
@@ -129,18 +153,25 @@ export const reorderTasks = async (
 };
 
 export const moveTask = async (
-  req: Request,
+  req: AuthRequest,
   res: Response,
   next: NextFunction
 ) => {
   try {
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(401).json({ message: "No autorizado" });
+      return;
+    }
+
     const id = Number(req.params.id);
     const { newColumnId, newOrder } = req.body;
     if (!newColumnId || typeof newOrder !== "number") {
       res.status(400).json({ message: "Datos de movimiento inválidos" });
       return;
     }
-    const task = await TaskService.moveTask(id, newColumnId, newOrder);
+
+    const task = await TaskService.moveTask(id, userId, newColumnId, newOrder);
     if (!task) {
       res.status(404).json({ message: "Tarea no encontrada" });
       return;

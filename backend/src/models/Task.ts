@@ -11,6 +11,7 @@ import {
   PrimaryKey,
 } from "sequelize-typescript";
 import { BoardColumn } from "./Column";
+import { User } from "./User";
 
 @Table({ tableName: "Tasks", timestamps: true, })
 export class Task extends Model<Task> {
@@ -40,6 +41,16 @@ export class Task extends Model<Task> {
 
   @BelongsTo(() => BoardColumn)
   declare column: BoardColumn;
+
+  @ForeignKey(() => User)
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: false,
+  })
+  declare userId: number;
+
+  @BelongsTo(() => User)
+  declare user: User;
 
   @CreatedAt
   @Column(DataType.DATE)
