@@ -1,19 +1,29 @@
 import { Request, Response, NextFunction } from "express";
 import { ColumnService } from "../services/columnService";
-import { BoardColumn } from "../models/Column";
+
+interface AuthRequest extends Request {
+  user?: { id: number; username: string };
+}
 
 export const createColumn = async (
-  req: Request,
+  req: AuthRequest,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const { name, order }: { name: string; order: number } = req.body;
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(401).json({ message: "No autorizado" });
+      return;
+    }
+
+    const { name, order } = req.body;
     if (!name || typeof order !== "number") {
       res.status(400).json({ message: "Nombre y orden requeridos" });
       return;
     }
-    const column: BoardColumn = await ColumnService.createColumn(name, order);
+
+    const column = await ColumnService.createColumn(name, order, userId);
     res.status(201).json(column);
   } catch (err) {
     next(err);
@@ -21,12 +31,18 @@ export const createColumn = async (
 };
 
 export const getAllColumns = async (
-  req: Request,
+  req: AuthRequest,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const columns: BoardColumn[] = await ColumnService.getAllColumns();
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(401).json({ message: "No autorizado" });
+      return 
+    }
+
+    const columns = await ColumnService.getAllColumns(userId);
     res.json(columns);
   } catch (err) {
     next(err);
@@ -34,16 +50,23 @@ export const getAllColumns = async (
 };
 
 export const getColumnById = async (
-  req: Request,
+  req: AuthRequest,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const id: number = Number(req.params.id);
-    const column: BoardColumn | null = await ColumnService.getColumnById(id);
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(401).json({ message: "No autorizado" });
+      return 
+    }
+
+    const id = Number(req.params.id);
+    const column = await ColumnService.getColumnById(id, userId);
+
     if (!column) {
       res.status(404).json({ message: "Columna no encontrada" });
-      return;
+      return 
     }
     res.json(column);
   } catch (err) {
@@ -52,17 +75,24 @@ export const getColumnById = async (
 };
 
 export const updateColumn = async (
-  req: Request,
+  req: AuthRequest,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const id: number = Number(req.params.id);
-    const data = req.body;
-    const column: BoardColumn | null = await ColumnService.updateColumn(id, data);
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(401).json({ message: "No autorizado" });
+      return 
+    }
+
+    const id = Number(req.params.id);
+    const { name } = req.body;
+    const column = await ColumnService.updateColumn(id, userId, { name });
+
     if (!column) {
       res.status(404).json({ message: "Columna no encontrada" });
-      return;
+      return 
     }
     res.json(column);
   } catch (err) {
@@ -71,19 +101,24 @@ export const updateColumn = async (
 };
 
 export const reorderColumns = async (
-  req: Request,
+  req: AuthRequest,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const { orderedIds }: { orderedIds: number[] } = req.body;
-    if (!orderedIds || !Array.isArray(orderedIds)) {
-      res.status(400).json({ message: "Se requiere un array de IDs ordenados." });
-      return; 
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(401).json({ message: "No autorizado" });
+      return 
     }
 
-    await ColumnService.reorderColumns(orderedIds);
+    const { orderedIds } = req.body;
+    if (!orderedIds || !Array.isArray(orderedIds)) {
+      res.status(400).json({ message: "Se requiere un array de IDs ordenados." });
+      return 
+    }
 
+    await ColumnService.reorderColumns(userId, orderedIds);
     res.status(200).json({ message: "Columnas reordenadas correctamente." });
   } catch (err) {
     next(err);
@@ -91,13 +126,20 @@ export const reorderColumns = async (
 };
 
 export const deleteColumn = async (
-  req: Request,
+  req: AuthRequest,
   res: Response,
   next: NextFunction
 ) => {
   try {
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(401).json({ message: "No autorizado" });
+      return;
+    }
+
     const id = Number(req.params.id);
-    const deleted = await ColumnService.deleteColumn(id);
+    const deleted = await ColumnService.deleteColumn(id, userId);
+
     if (!deleted) {
       res.status(404).json({ message: "Columna no encontrada" });
       return;

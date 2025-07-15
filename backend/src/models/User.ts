@@ -1,4 +1,6 @@
-import { Table, Column, Model, DataType, CreatedAt, UpdatedAt, PrimaryKey, AutoIncrement } from "sequelize-typescript";
+import { Table, Column, Model, DataType, CreatedAt, UpdatedAt, PrimaryKey, AutoIncrement, HasMany } from "sequelize-typescript";
+import { BoardColumn } from "./Column";
+import { Task } from "./Task";
 
 @Table({ 
   tableName: "Users",
@@ -26,4 +28,10 @@ export class User extends Model<User> {
   @UpdatedAt
   @Column(DataType.DATE)
   declare updatedAt: Date;
+
+  @HasMany(() => BoardColumn)
+  declare columns: BoardColumn[];
+
+  @HasMany(() => Task)
+  declare tasks: Task[];
 }
