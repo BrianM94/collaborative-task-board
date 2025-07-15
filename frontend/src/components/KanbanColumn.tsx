@@ -51,6 +51,7 @@ const KanbanColumn = ({ column, tasks, onEdit, onDelete, onEditTask, onDeleteTas
         <h2 className={styles.title}>{column.name}</h2>
         <div className={styles.actions}>
           <button 
+            className={styles.editButton}
             onClick={() => onEdit?.(column)} 
             disabled={!onEdit}
             onMouseDown={(e) => e.stopPropagation()}
@@ -68,20 +69,27 @@ const KanbanColumn = ({ column, tasks, onEdit, onDelete, onEditTask, onDeleteTas
         </div>
       </div>
 
-      <div 
-        className={styles.tasks}
-        data-column-drop-zone={column.id}
-      >
-        <SortableContext items={tasksIds}>
-          {tasks.map((task) => (
-            <KanbanTask 
-              key={task.id} 
-              task={task} 
-              onEdit={onEditTask} 
-              onDelete={onDeleteTask} 
-            />
-          ))}
-        </SortableContext>
+      <div className={styles.tasksContainer}>
+        <div 
+          className={styles.tasks}
+          data-column-drop-zone={column.id}
+        >
+          <SortableContext items={tasksIds}>
+            {tasks.map((task) => (
+              <KanbanTask 
+                key={task.id} 
+                task={task} 
+                onEdit={onEditTask} 
+                onDelete={onDeleteTask} 
+              />
+            ))}
+          </SortableContext>
+        </div>
+        
+        <div 
+          className={styles.columnDropZone}
+          data-column-drop-zone={column.id}
+        />
       </div>
     </div>
   );
